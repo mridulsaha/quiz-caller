@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+notified_quizzes.json
+*.log
+.DS_Store
+.idea/
+.vscode/
