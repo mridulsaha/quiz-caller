@@ -16,10 +16,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Restore Notification State Cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: notified_quizzes.json
           key: quiz-cache-${{ github.run_id }}
@@ -27,7 +26,7 @@ jobs:
             quiz-cache-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Execute Quiz Check
         run: node run.js
