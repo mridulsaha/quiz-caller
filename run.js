@@ -104,6 +104,11 @@ async function main() {
     return;
   }
 
+  await sendEmailAll({
+  subject: "GitHub Action Test Email",
+  text: "GitHub Action is dispatching emails properly!",
+  });
+
   try {
     checkTokenValidity(token);
   } catch (e) {
