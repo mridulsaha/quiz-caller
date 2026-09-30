@@ -119,34 +119,6 @@ async function main() {
     return;
   }
 
-  console.log("\n==============================================");
-  console.log("🔍 TESTING FETCH FOR COURSE: Operating System (3922)");
-  console.log("==============================================");
-  try {
-    const osRes = await fetch(
-      "https://ams.mitsgwalior.in/api/api/v1/quiz/student/course/3922",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log(`HTTP Status: ${osRes.status} ${osRes.statusText}`);
-    
-    if (osRes.ok) {
-      const osData = await osRes.json();
-      console.log("Raw OS Response Data:");
-      console.dir(osData, { depth: null, colors: true });
-    } else {
-      const errText = await osRes.text();
-      console.error("OS Fetch Failed Body:", errText);
-    }
-  } catch (err) {
-    console.error("OS Pre-flight Error:", err.message);
-  }
-  console.log("==============================================\n");
-
   const minutesBefore = Number(process.env.MINUTES_BEFORE) || 15;
   const millisBefore = minutesBefore * 60 * 1000;
   const now = new Date();
