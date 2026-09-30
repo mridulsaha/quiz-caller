@@ -1,0 +1,48 @@
+name: Check Quizzes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  run-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Restore Notification State Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: notified_quizzes.json
+          key: quiz-cache-${{ github.run_id }}
+          restore-keys: |
+            quiz-cache-
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Execute Quiz Check
+        run: node run.js
+        env:
+          EMAILS: ${{ secrets.EMAILS }}
+          SUBJECTS: ${{ secrets.SUBJECTS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
+          MINUTES_BEFORE: ${{ secrets.MINUTES_BEFORE }}
+
+      - name: Save Updated Notification State
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: notified_quizzes.json
+          key: quiz-cache-${{ github.run_id }}
