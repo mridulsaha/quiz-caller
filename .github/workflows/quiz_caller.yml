@@ -2,8 +2,10 @@ name: Check Quizzes
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
+
+concurrency:
+  group: quiz-caller-run
+  cancel-in-progress: false
 
 jobs:
   run-check:
@@ -39,6 +41,10 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
           MINUTES_BEFORE: ${{ secrets.MINUTES_BEFORE }}
+
+      - name: Ensure Cache File Exists
+        if: always()
+        run: touch notified_quizzes.json
 
       - name: Save Updated Notification State
         uses: actions/cache/save@v4
