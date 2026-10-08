@@ -86,6 +86,12 @@ function checkTokenValidity(tok) {
   }
 }
 
+function parseISTDate(dateStr) {
+  if (!dateStr) return new Date();
+  const cleanStr = String(dateStr).trim().replace(/Z|[+-]\d{2}:?\d{2}$/, "");
+  return new Date(`${cleanStr}+05:30`);
+}
+
 function formatIST(dateObj) {
   return dateObj.toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
@@ -122,7 +128,9 @@ async function main() {
   const minutesBefore = Number(process.env.MINUTES_BEFORE) || 15;
   const millisBefore = minutesBefore * 60 * 1000;
   const now = new Date();
-  console.log('Millis is Before: ', millisBefore);
+
+  console.log("Current time (IST):", formatIST(now));
+  console.log("Millis is Before:", millisBefore);
 
   for (const courseId of subjects) {
     try {
@@ -148,14 +156,9 @@ async function main() {
         if (quiz.status === "ended") continue;
 
         const quizId = quiz.id;
-        const startTime = new Date(quiz.start_time);
-        const endTime = new Date(quiz.end_time);
+        const startTime = parseISTDate(quiz.start_time);
+        const endTime = parseISTDate(quiz.end_time);
         const startDiff = startTime - now;
-
-        console.log('Start Time: ',startTime);
-        console.log('End Time: ',endTime);
-        console.log('Start Diff: ',startDiff);
-        console.log('Course: ',subjectName[courseId] || `Course ${courseId}`);
 
         const subName = subjectName[courseId] || `Course ${courseId}`;
         const startFormatted = formatIST(startTime);
@@ -163,10 +166,23 @@ async function main() {
 
         const upcomingKey = `${quizId}_upcoming`;
         const startedKey = `${quizId}_started`;
-        console.log('startDiff >= 0 && startDiff <= millisBefore: ',startDiff >= 0 && startDiff <= millisBefore);
-        console.log('!notifiedQuizzes.has(upcomingKey): ', !notifiedQuizzes.has(upcomingKey));
 
-        if (startDiff >= 0 && startDiff <= millisBefore) {
+        console.log(`\n--- Course: ${subName} ---`);
+        console.log("Quiz Name:", quiz.name);
+        console.log("Parsed Start (IST):", startFormatted);
+        console.log("Parsed End (IST):", endFormatted);
+        console.log("Start Diff (ms):", startDiff);
+        console.log("Upcoming check match:", startDiff >= 0 && startDiff <= millisBefore);
+        console.log("Already notified upcoming?", notifiedQuizzes.has(upcomingKey));
+        console.log("Live check match:", now >= startTime && now <= endTime);
+        console.log("Already notified started?", notifiedQuizzes.has(startedKey));
+
+        // 1. Upcoming quiz window: Within buffer and hasn't notified yet
+        if (
+          startDiff >= 0 &&
+          startDiff <= millisBefore &&
+          !notifiedQuizzes.has(upcomingKey)
+        ) {
           saveNotificationKey(upcomingKey);
           await sendEmailAll({
             subject: `${subName} Quiz: ${quiz.name} starts at ${startFormatted}`,
@@ -174,9 +190,11 @@ async function main() {
           });
         }
 
-        console.log('now >= startTime && now <= endTime: ',now >= startTime && now <= endTime);
-        
-        if (now >= startTime && now <= endTime) {
+        if (
+          now >= startTime &&
+          now <= endTime &&
+          !notifiedQuizzes.has(startedKey)
+        ) {
           saveNotificationKey(startedKey);
           await sendEmailAll({
             subject: `Important: ${subName} Quiz: ${quiz.name} has STARTED`,
