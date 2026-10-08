@@ -179,7 +179,8 @@ async function main() {
 
         if (
           startDiff >= 0 &&
-          startDiff <= millisBefore
+          startDiff <= millisBefore &&
+          !notifiedQuizzes.has(upcomingKey)
         ) {
           saveNotificationKey(upcomingKey);
           await sendEmailAll({
@@ -190,7 +191,8 @@ async function main() {
 
         if (
           now >= startTime &&
-          now <= endTime
+          now <= endTime &&
+          !notifiedQuizzes.has(startedKey)
         ) {
           saveNotificationKey(startedKey);
           await sendEmailAll({
