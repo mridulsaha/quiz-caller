@@ -177,11 +177,9 @@ async function main() {
         console.log("Live check match:", now >= startTime && now <= endTime);
         console.log("Already notified started?", notifiedQuizzes.has(startedKey));
 
-        // 1. Upcoming quiz window: Within buffer and hasn't notified yet
         if (
           startDiff >= 0 &&
-          startDiff <= millisBefore &&
-          !notifiedQuizzes.has(upcomingKey)
+          startDiff <= millisBefore
         ) {
           saveNotificationKey(upcomingKey);
           await sendEmailAll({
@@ -192,8 +190,7 @@ async function main() {
 
         if (
           now >= startTime &&
-          now <= endTime &&
-          !notifiedQuizzes.has(startedKey)
+          now <= endTime
         ) {
           saveNotificationKey(startedKey);
           await sendEmailAll({
