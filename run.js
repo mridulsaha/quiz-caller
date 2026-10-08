@@ -151,6 +151,11 @@ async function main() {
         const endTime = new Date(quiz.end_time);
         const startDiff = startTime - now;
 
+        console.log('Start Time: ',startTime);
+        console.log('End Time: ',endTime);
+        console.log('Start Diff: ',startDiff);
+        console.log('Course: ',subjectName[courseId] || `Course ${courseId}`);
+
         const subName = subjectName[courseId] || `Course ${courseId}`;
         const startFormatted = formatIST(startTime);
         const endFormatted = formatIST(endTime);
