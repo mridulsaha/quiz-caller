@@ -122,6 +122,7 @@ async function main() {
   const minutesBefore = Number(process.env.MINUTES_BEFORE) || 15;
   const millisBefore = minutesBefore * 60 * 1000;
   const now = new Date();
+  console.log('Millis is Before: ', millisBefore);
 
   for (const courseId of subjects) {
     try {
@@ -162,8 +163,10 @@ async function main() {
 
         const upcomingKey = `${quizId}_upcoming`;
         const startedKey = `${quizId}_started`;
+        console.log('startDiff >= 0 && startDiff <= millisBefore: ',startDiff >= 0 && startDiff <= millisBefore);
+        console.log('!notifiedQuizzes.has(upcomingKey): ', !notifiedQuizzes.has(upcomingKey));
 
-        if (startDiff >= 0 && startDiff <= millisBefore && !notifiedQuizzes.has(upcomingKey)) {
+        if (startDiff >= 0 && startDiff <= millisBefore) {
           saveNotificationKey(upcomingKey);
           await sendEmailAll({
             subject: `${subName} Quiz: ${quiz.name} starts at ${startFormatted}`,
@@ -171,7 +174,9 @@ async function main() {
           });
         }
 
-        if (now >= startTime && now <= endTime && !notifiedQuizzes.has(startedKey)) {
+        console.log('now >= startTime && now <= endTime: ',now >= startTime && now <= endTime);
+        
+        if (now >= startTime && now <= endTime) {
           saveNotificationKey(startedKey);
           await sendEmailAll({
             subject: `Important: ${subName} Quiz: ${quiz.name} has STARTED`,
